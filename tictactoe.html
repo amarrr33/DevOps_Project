@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+        background: #0f172a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+    }
+
+    .game {
+        background: #020617;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        text-align: center;
+        width: 320px;
+    }
+
+    h1 {
+        margin-bottom: 15px;
+        font-size: 24px;
+    }
+
+    .status {
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #38bdf8;
+    }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .cell {
+        width: 90px;
+        height: 90px;
+        background: #020617;
+        border: 2px solid #1e293b;
+        border-radius: 12px;
+        font-size: 36px;
+        font-weight: bold;
+        color: #38bdf8;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .cell:hover {
+        background: #020617;
+        transform: scale(1.05);
+    }
+
+    .cell.o {
+        color: #f97316;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #38bdf8;
+        color: #020617;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #0ea5e9;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+    <h1>Tic Tac Toe</h1>
+    <div class="status" id="status">Your turn (X)</div>
+
+    <div class="board" id="board"></div>
+
+    <button onclick="resetGame()">Restart</button>
+</div>
+
+<script>
+    const board = document.getElementById("board");
+    const statusText = document.getElementById("status");
+
+    let cells = Array(9).fill("");
+    let gameOver = false;
+
+    const winPatterns = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+
+    function createBoard() {
+        board.innerHTML = "";
+        cells.forEach((cell, index) => {
+            const div = document.createElement("button");
+            div.classList.add("cell");
+            div.innerText = cell;
+            div.onclick = () => playerMove(index);
+            board.appendChild(div);
+        });
+    }
+
+    function playerMove(index) {
+        if (cells[index] !== "" || gameOver) return;
+
+        cells[index] = "X";
+        createBoard();
+
+        if (checkWinner("X")) {
+            statusText.innerText = "You win 🎉";
+            gameOver = true;
+            return;
+        }
+
+        if (cells.every(cell => cell !== "")) {
+            statusText.innerText = "Draw 🤝";
+            gameOver = true;
+            return;
+        }
+
+        statusText.innerText = "Computer thinking...";
+        setTimeout(computerMove, 500);
+    }
+
+    function computerMove() {
+        let move = findBestMove();
+        cells[move] = "O";
+        createBoard();
+
+        if (checkWinner("O")) {
+            statusText.innerText = "Computer wins 😈";
+            gameOver = true;
+            return;
+        }
+
+        if (cells.every(cell => cell !== "")) {
+            statusText.innerText = "Draw 🤝";
+            gameOver = true;
+            return;
+        }
+
+        statusText.innerText = "Your turn (X)";
+    }
+
+    function findBestMove() {
+        // Try to win
+        for (let i = 0; i < 9; i++) {
+            if (cells[i] === "") {
+                cells[i] = "O";
+                if (checkWinner("O")) {
+                    cells[i] = "";
+                    return i;
+                }
+                cells[i] = "";
+            }
+        }
+
+        // Block player
+        for (let i = 0; i < 9; i++) {
+            if (cells[i] === "") {
+                cells[i] = "X";
+                if (checkWinner("X")) {
+                    cells[i] = "";
+                    return i;
+                }
+                cells[i] = "";
+            }
+        }
+
+        // Take center if available
+        if (cells[4] === "") return 4;
+
+        // Otherwise random
+        const available = cells
+            .map((v, i) => v === "" ? i : null)
+            .filter(v => v !== null);
+
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    function checkWinner(player) {
+        return winPatterns.some(pattern =>
+            pattern.every(index => cells[index] === player)
+        );
+    }
+
+    function resetGame() {
+        cells = Array(9).fill("");
+        gameOver = false;
+        statusText.innerText = "Your turn (X)";
+        createBoard();
+    }
+
+    createBoard();
+</script>
+
+</body>
+</html>
