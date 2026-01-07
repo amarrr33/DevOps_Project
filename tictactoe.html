@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Tic Tac Toe</title>
-
 <style>
     * {
         box-sizing: border-box;
-        font-family: "Segoe UI", sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
     }
 
     body {
-        background: #0f172a;
+        background: radial-gradient(circle at top, #1e293b, #020617);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -20,198 +14,108 @@
     }
 
     .game {
-        background: #020617;
-        padding: 30px;
-        border-radius: 16px;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        background: rgba(2, 6, 23, 0.7);
+        backdrop-filter: blur(18px);
+        padding: 32px;
+        border-radius: 20px;
+        box-shadow:
+            0 30px 60px rgba(0,0,0,0.7),
+            inset 0 0 0 1px rgba(255,255,255,0.05);
         text-align: center;
-        width: 320px;
+        width: 340px;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     h1 {
-        margin-bottom: 15px;
-        font-size: 24px;
+        margin-bottom: 10px;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
     .status {
-        margin-bottom: 15px;
-        font-size: 16px;
-        color: #38bdf8;
+        margin-bottom: 18px;
+        font-size: 15px;
+        color: #7dd3fc;
+        min-height: 20px;
     }
 
     .board {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        gap: 14px;
+        margin-top: 10px;
     }
 
     .cell {
         width: 90px;
         height: 90px;
-        background: #020617;
-        border: 2px solid #1e293b;
-        border-radius: 12px;
-        font-size: 36px;
-        font-weight: bold;
+        background: linear-gradient(145deg, #020617, #020617);
+        border-radius: 16px;
+        border: none;
+        box-shadow:
+            6px 6px 12px rgba(0,0,0,0.6),
+            inset 0 0 0 1px rgba(255,255,255,0.06);
+        font-size: 38px;
+        font-weight: 600;
         color: #38bdf8;
         cursor: pointer;
-        transition: 0.2s;
+        transition: all 0.25s ease;
     }
 
     .cell:hover {
-        background: #020617;
-        transform: scale(1.05);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow:
+            0 15px 25px rgba(56,189,248,0.25),
+            inset 0 0 0 1px rgba(255,255,255,0.1);
+    }
+
+    .cell:active {
+        transform: scale(0.95);
     }
 
     .cell.o {
-        color: #f97316;
+        color: #fb923c;
     }
 
     button {
-        margin-top: 20px;
-        padding: 10px 20px;
+        margin-top: 26px;
+        padding: 12px 28px;
+        border-radius: 12px;
         border: none;
-        border-radius: 8px;
-        background: #38bdf8;
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
         color: #020617;
-        font-size: 16px;
+        font-size: 15px;
+        font-weight: 600;
         cursor: pointer;
+        box-shadow: 0 10px 25px rgba(56,189,248,0.35);
+        transition: all 0.25s ease;
     }
 
     button:hover {
-        background: #0ea5e9;
+        transform: translateY(-2px);
+        box-shadow: 0 18px 35px rgba(56,189,248,0.45);
+    }
+
+    button:active {
+        transform: scale(0.96);
+    }
+
+    @media (max-width: 400px) {
+        .game {
+            width: 300px;
+            padding: 26px;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
     }
 </style>
-</head>
-
-<body>
-
-<div class="game">
-    <h1>Tic Tac Toe</h1>
-    <div class="status" id="status">Your turn (X)</div>
-
-    <div class="board" id="board"></div>
-
-    <button onclick="resetGame()">Restart</button>
-</div>
-
-<script>
-    const board = document.getElementById("board");
-    const statusText = document.getElementById("status");
-
-    let cells = Array(9).fill("");
-    let gameOver = false;
-
-    const winPatterns = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-    ];
-
-    function createBoard() {
-        board.innerHTML = "";
-        cells.forEach((cell, index) => {
-            const div = document.createElement("button");
-            div.classList.add("cell");
-            div.innerText = cell;
-            div.onclick = () => playerMove(index);
-            board.appendChild(div);
-        });
-    }
-
-    function playerMove(index) {
-        if (cells[index] !== "" || gameOver) return;
-
-        cells[index] = "X";
-        createBoard();
-
-        if (checkWinner("X")) {
-            statusText.innerText = "You win 🎉";
-            gameOver = true;
-            return;
-        }
-
-        if (cells.every(cell => cell !== "")) {
-            statusText.innerText = "Draw 🤝";
-            gameOver = true;
-            return;
-        }
-
-        statusText.innerText = "Computer thinking...";
-        setTimeout(computerMove, 500);
-    }
-
-    function computerMove() {
-        let move = findBestMove();
-        cells[move] = "O";
-        createBoard();
-
-        if (checkWinner("O")) {
-            statusText.innerText = "Computer wins 😈";
-            gameOver = true;
-            return;
-        }
-
-        if (cells.every(cell => cell !== "")) {
-            statusText.innerText = "Draw 🤝";
-            gameOver = true;
-            return;
-        }
-
-        statusText.innerText = "Your turn (X)";
-    }
-
-    function findBestMove() {
-        // Try to win
-        for (let i = 0; i < 9; i++) {
-            if (cells[i] === "") {
-                cells[i] = "O";
-                if (checkWinner("O")) {
-                    cells[i] = "";
-                    return i;
-                }
-                cells[i] = "";
-            }
-        }
-
-        // Block player
-        for (let i = 0; i < 9; i++) {
-            if (cells[i] === "") {
-                cells[i] = "X";
-                if (checkWinner("X")) {
-                    cells[i] = "";
-                    return i;
-                }
-                cells[i] = "";
-            }
-        }
-
-        // Take center if available
-        if (cells[4] === "") return 4;
-
-        // Otherwise random
-        const available = cells
-            .map((v, i) => v === "" ? i : null)
-            .filter(v => v !== null);
-
-        return available[Math.floor(Math.random() * available.length)];
-    }
-
-    function checkWinner(player) {
-        return winPatterns.some(pattern =>
-            pattern.every(index => cells[index] === player)
-        );
-    }
-
-    function resetGame() {
-        cells = Array(9).fill("");
-        gameOver = false;
-        statusText.innerText = "Your turn (X)";
-        createBoard();
-    }
-
-    createBoard();
-</script>
-
-</body>
-</html>
